@@ -2,6 +2,7 @@ import { Button } from "@mui/material"
 import { Product } from "../../app/models/product"
 import ProductList from "./ProductList"
 import { useEffect, useState } from "react";
+import agent from "../../app/api/agent";
 
 interface Props {
 }
@@ -22,11 +23,8 @@ export default function Catalog() {
     }
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/products')
-            .then(response => response.json())
-            .then(response => {
-                setProducts(response);
-            })
+        agent.Catalog.list()
+        .then(products => setProducts(products));
     }, []);
 
     return (
