@@ -1,9 +1,48 @@
-import { Typography } from "@mui/material";
+import { Divider, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Product } from "../../app/models/product";
 
-export default function ProductDetail(){
+export default function ProductDetail() {
+    const { id } = useParams<{ id: string }>();
+    const [product, setProduct] = useState<Product | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        axios.get(`http://localhost:5000/api/products/${id}`)
+            .then(response => setProduct(response.data))
+            .catch(error => console.log(error))
+            .finally(() => setLoading(false));
+    }, [])
+
+    if (loading) return <h3>Loading....</h3>
+
+    if (!product) return <h3>Product Not Found</h3>
+
     return (
-        <Typography variant="h2">
-            ProductDetail
-        </Typography>
+        <Grid container spacing={6}>
+            <Grid item xs={6}>
+                <img src={product.pictureUrl} alt={product.name} style={{ width: '100%' }} />
+            </Grid>
+            <Grid item xs={6}>
+                <Typography variant="h3">{product.name}</Typography>
+                <Divider sx={{ mb: 3 }}/>
+                <Typography variant="h4">{`$${product.price.toFixed(2)}`}</Typography>
+                <TableContainer>
+                    <Table>
+                        <TableBody>
+                            {Object.keys(product).map(prop => (
+                                <TableRow key={prop}>
+                                    <TableCell align="left">{prop}</TableCell>
+                                    <TableCell align="left">{(product as any)[prop]}</TableCell>
+                                </TableRow>
+                            ))}
+
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </Grid>
+        </Grid>
     )
 }
