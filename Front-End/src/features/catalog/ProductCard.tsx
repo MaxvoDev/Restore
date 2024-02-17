@@ -1,4 +1,4 @@
-import { ListItem, ListItemAvatar, Avatar, ListItemText, CardMedia, CardActions, Typography, Button, Card, CardContent, CardHeader, IconButton } from "@mui/material"
+import { Avatar, CardMedia, CardActions, Typography, Button, Card, CardContent, CardHeader } from "@mui/material"
 import { Product } from "../../app/models/product"
 
 interface Props {
@@ -29,8 +29,8 @@ export default function ProductCard({ product }: Props) {
                 <Typography color='text.secondary'>{product.brand} / {product.type}</Typography>
             </CardContent>
             <CardActions>
-                <Button size="small">Share</Button>
-                <Button size="small">Learn More</Button>
+                <Button size="small">Add To Cart</Button>
+                <Button size="small">View</Button>
             </CardActions>
         </Card>
     )
