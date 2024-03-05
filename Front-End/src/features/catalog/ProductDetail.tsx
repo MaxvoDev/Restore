@@ -6,14 +6,16 @@ import agent from "../../app/api/agent";
 import NotFound from "../../app/errors/NotFound";
 import { LoadingButton } from "@mui/lab";
 import LoadingComponent from "../../app/layout/LoadingComponent";
-import { useStoreContext } from "../../app/context/StoreContext";
+import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
+import { addBasketItemAsync, removeBasketItemAsync } from "../basket/BasketSlice";
 
 export default function ProductDetail() {
     const { id } = useParams<{ id: string }>();
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [quantity, setQuantity] = useState<number>(0);
-    const { basket, setBasket, removeBasketItem } = useStoreContext();
+    const dispatch = useAppDispatch();
+    const { basket, status } = useAppSelector(state => state.basket);
 
     function handleInputChange(event: any){
         if(+event.target.value > 0)
@@ -23,22 +25,21 @@ export default function ProductDetail() {
     function handleUpdateItemQuantity(){
         if(!product) return;
 
-        setLoading(true);
         const basketItem = basket?.items.find(item => item.productId == product?.id);
         const oldQuantity = basketItem?.quantity || 0;
         const action = quantity > oldQuantity ? "ADD" : "REMOVE";
         const diffQuantity = Math.abs(quantity - oldQuantity);
         if( action == "ADD" ){
-            agent.Basket.addItem(product.id, diffQuantity)
-            .then((basket) => setBasket(basket))
-            .catch(err => console.log(err))
-            .finally(() => setLoading(false));
+            dispatch(addBasketItemAsync({
+                productId: product.id,
+                quantity: diffQuantity
+            }));
         }
         else{
-            agent.Basket.removeItem(product.id, diffQuantity)
-            .then((basket) => setBasket(basket))
-            .catch(err => console.log(err))
-            .finally(() => setLoading(false));
+            dispatch(removeBasketItemAsync({
+                productId: product.id,
+                quantity: diffQuantity
+            }));
         }
         
     }
@@ -102,7 +103,7 @@ export default function ProductDetail() {
                     <Grid item xs={6}>
                         <LoadingButton
                         onClick={handleUpdateItemQuantity}
-                        loading={loading}
+                        loading={ status.includes("pending") }
                         sx={{ height: "55px" }}
                         color="primary"
                         variant="contained"
