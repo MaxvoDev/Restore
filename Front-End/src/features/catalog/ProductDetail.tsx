@@ -1,22 +1,26 @@
 import { Divider, Grid, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Product } from "../../app/models/product";
-import agent from "../../app/api/agent";
 import NotFound from "../../app/errors/NotFound";
 import { LoadingButton } from "@mui/lab";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import { addBasketItemAsync, removeBasketItemAsync } from "../basket/BasketSlice";
+import { fetchProductDetailAsync, productSelectors } from "./CatalogSlice";
 
 export default function ProductDetail() {
-    const { id } = useParams<{ id: string }>();
-    const [product, setProduct] = useState<Product | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [quantity, setQuantity] = useState<number>(0);
     const dispatch = useAppDispatch();
+
+    const { id } = useParams<{ id: string }>();
+    const product = useAppSelector(state => productSelectors.selectById(state, +id!));
+    
+    const [quantity, setQuantity] = useState<number>(0);
     const { basket, status } = useAppSelector(state => state.basket);
 
+    const { status: productStatus } = useAppSelector(state => state.catalog);
+
+    const basketItem = basket?.items.find(i => i.productId == product.id);
+    
     function handleInputChange(event: any){
         if(+event.target.value > 0)
             setQuantity(event.target.value);
@@ -45,20 +49,13 @@ export default function ProductDetail() {
     }
 
     useEffect(() => {
-        id && agent.Catalog.details(+id)
-            .then(product => {
-                setProduct(product);
-                const basketItem = basket?.items.find(item => item.productId == product.id);
-                if(!basketItem) 
-                    setQuantity(0);
-                else 
-                    setQuantity(basketItem.quantity);
-            })
-            .catch(error => console.log(error))
-            .finally(() => setLoading(false));
-    }, [id])
+        if(basketItem) setQuantity(basketItem.quantity);
+        if(!product){
+            dispatch(fetchProductDetailAsync(+id!));
+        }   
+    }, [id, basketItem, dispatch, product]);
 
-    if (loading) return <LoadingComponent />
+    if (productStatus.includes("pending")) return <LoadingComponent />
 
     if (!product) return <NotFound/>
 
