@@ -12,7 +12,7 @@ namespace API.Entities
         public List<BasketItem> Items { get; set; } = new();
 
         public void AddItem(Product product, int quantity){
-            var existingItem = Items.FirstOrDefault(item => item.Id == product.Id);
+            var existingItem = Items.FirstOrDefault(item => item.ProductId == product.Id);
             if(existingItem == null) 
                 Items.Add(new BasketItem{ Product = product, Quantity = quantity });
             else
@@ -20,11 +20,11 @@ namespace API.Entities
         }
 
         public void RemoveItem(int productId, int quantity){
-            var basketItem = Items.FirstOrDefault(item => item.Id == productId);
+            var basketItem = Items.FirstOrDefault(item => item.ProductId == productId);
             if(basketItem == null) return;
             
             basketItem.Quantity -= quantity;
-            if(basketItem.Quantity == 0)
+            if(basketItem.Quantity <= 0)
                 Items.Remove(basketItem);
         }
     }
