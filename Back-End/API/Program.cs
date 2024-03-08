@@ -1,54 +1,61 @@
-using API.Data;
-using API.Entities;
-using API.Middleware;
-using Microsoft.EntityFrameworkCore;
+    using System.Text.Json;
+    using API.Data;
+    using API.Entities;
+    using API.Middleware;
+    using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+    var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.!
+    // Add services to the container.!
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+    builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    });
 
-builder.Services.AddDbContext<StoreContext>(opt => 
-{
-    opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
+    builder.Services.AddDbContext<StoreContext>(opt => 
+    {
+        opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+    });
 
-app.UseMiddleware<ExceptionMiddleware>();
+    var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    app.UseMiddleware<ExceptionMiddleware>();
 
-app.UseCors(opt => 
-{
-    opt.AllowAnyHeader().AllowCredentials().AllowAnyMethod().WithOrigins("http://localhost:3000"); 
-});
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
-app.UseAuthorization();
+    app.UseCors(opt => 
+    {
+        opt.AllowAnyHeader().AllowCredentials().AllowAnyMethod().WithOrigins("http://localhost:3000")
+        .WithExposedHeaders("Pagination");
+    });
 
-app.MapControllers();
+    app.UseAuthorization();
 
-var scope = app.Services.CreateScope();
-var context = scope.ServiceProvider.GetRequiredService<StoreContext>();
-var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    app.MapControllers();
 
-try
-{
-    context.Database.Migrate();
-    DbInitializer.Initialize(context);
-}
-catch(Exception ex)
-{
-    logger.LogError(ex, "A problem occurred during migration");
-}
+    var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<StoreContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
-app.Run();
+    try
+    {
+        context.Database.Migrate();
+        DbInitializer.Initialize(context);
+    }
+    catch(Exception ex)
+    {
+        logger.LogError(ex, "A problem occurred during migration");
+    }
+
+    app.Run();

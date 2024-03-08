@@ -36,7 +36,11 @@ namespace API.Controllers
 
             var products = await PagedList<Product>.ToPagedList(query, productParams.PageNumber, productParams.PageSize);
 
-            Response.Headers.Add("Pagination", JsonSerializer.Serialize(products.MetaData));
+            var serializeOptions = new JsonSerializerOptions{
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            };
+
+            Response.Headers.Add("Pagination", JsonSerializer.Serialize(products.MetaData, serializeOptions));
 
             return products;
         }

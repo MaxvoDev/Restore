@@ -1,6 +1,5 @@
 import ProductList from "./ProductList"
 import { useEffect } from "react";
-import LoadingComponent from "../../app/layout/LoadingComponent";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
 import { fetchProductFiltersAsync, fetchProductsAsync, productSelectors, setProductParams } from "./CatalogSlice";
 import { Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, Pagination, Paper, Radio, RadioGroup, Stack, TextField } from "@mui/material";
@@ -24,12 +23,12 @@ const sortTypes = [
 export default function Catalog() {
     const products = useAppSelector(productSelectors.selectAll);
     const dispatch = useAppDispatch();
-    const { productParams, productLoaded, filterLoaded, types, brands, status } = useAppSelector(state => state.catalog);
+    const { productParams, productLoaded, filterLoaded, types, brands, status, metaData } = useAppSelector(state => state.catalog);
 
     function onChangeParam(name: string, value: string, checked: boolean = true){
         let payload;
 
-        if(name == "orderBy" || name == "searchTerm"){
+        if(name == "orderBy" || name == "searchTerm" || name == "pageNumber"){
             payload = { [name]: {} };
             payload[name] = value;
         }
@@ -50,22 +49,20 @@ export default function Catalog() {
         if (!productLoaded) {
             dispatch(fetchProductsAsync());
         }
-    }, [productLoaded]);
+    }, [productLoaded, fetchProductsAsync]);
 
     useEffect(() => {
         if (!filterLoaded) {
             dispatch(fetchProductFiltersAsync())
         }
-    }, [filterLoaded]);
-
-    if (status.includes("pending")) return <LoadingComponent />
+    }, [filterLoaded, fetchProductFiltersAsync]);
 
     return (
         <Grid container>
             <Grid item xs={3}>
                 <Paper elevation={3} sx={{ mb: 2 }}>
                     <TextField
-                        label="Search Products..."
+                    label="Search Product..."
                         variant="outlined"
                         fullWidth>
 
@@ -128,10 +125,17 @@ export default function Catalog() {
             </Grid>
             <Grid item xs={9} sx={{ p: 3 }}>
                 <ProductList products={products} />
-
-                <Stack spacing={2}>
-                    <Pagination count={10} color="primary" />
-                </Stack>
+                {
+                    metaData && (
+                        <Stack spacing={2} sx={{ mt: 4 }} alignItems={"center"}>
+                            <Pagination 
+                            page={metaData?.currentPage}
+                            count={metaData?.totalPages } 
+                            onChange={(_, page) => onChangeParam("pageNumber", page.toString())}
+                            color="primary" />
+                        </Stack>
+                    )
+                }
             </Grid>
         </Grid>
     )
