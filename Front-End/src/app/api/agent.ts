@@ -65,6 +65,12 @@ const Catalog = {
     details: (id: number) => requests.get(`products/${id}`)
 }
 
+const Account = {
+    signin: (values: any) => requests.post('account/login', values),
+    signup: (values: any) => requests.post('account/register', values),
+    currentUser: () => requests.get('account/currentUser')
+};
+
 const Basket = {
     get: () => requests.get('basket'),
     addItem: (productId: number, quantity: number = 1) => requests.post(`basket?productId=${productId}&quantity=${quantity}`, {}),
@@ -81,7 +87,8 @@ const TestErrors = {
 const agent = {
     Catalog,
     Basket,
-    TestErrors
+    TestErrors,
+    Account
 }
 
 export default agent;

@@ -26,8 +26,8 @@ const midLinks = [
 ]
 
 const rightLinks = [
-    { title: 'login', path: '/login'},
-    { title: 'register', path: '/register'},    
+    { title: 'Sign In', path: '/signin'},
+    { title: 'Sign Up', path: '/signup'},    
 ]
 
 export default function Header({darkMode, handleThemeChange}: Props) {
@@ -58,7 +58,7 @@ export default function Header({darkMode, handleThemeChange}: Props) {
                 
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                     <IconButton component={Link} to="/basket" size="large" edge="start" color="inherit" 
-                    sx={{mr: 2}}>
+                   >
                         <Badge badgeContent={itemCount} color="secondary">
                             <ShoppingCart />
                         </Badge>
