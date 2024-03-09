@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, isAnyOf } from "@reduxjs/toolkit";
 import { User } from "../../app/models/user";
 import agent from "../../app/api/agent";
+import { toast } from "react-toastify";
 
 export interface AccountState{
     user: User | null;
@@ -14,7 +15,7 @@ export const signInUserAsync = createAsyncThunk<User, { username: string, passwo
     'account/signInUserAsync',
     async (loginDto, thunkAPI) => {
         try{
-            const user = agent.Account.signin(loginDto);
+            const user = await agent.Account.signin(loginDto);
             localStorage.setItem('user', JSON.stringify(user));
             return user;
         }
@@ -27,13 +28,20 @@ export const signInUserAsync = createAsyncThunk<User, { username: string, passwo
 export const fetchCurrentUserAsync = createAsyncThunk<User>(
     'account/fetchCurrentUserAsync',
     async (_, thunkAPI) => {
+        const savedUser = JSON.parse(localStorage.getItem('user')!);
+        thunkAPI.dispatch(setUser(savedUser));
         try{
-            const user = agent.Account.currentUser();
+            const user = await agent.Account.currentUser();
             localStorage.setItem('user', JSON.stringify(user));
             return user;
         }
         catch(error: any){
             thunkAPI.rejectWithValue({ error: error.data });
+        }
+    },
+    {
+        condition: () => {
+            if (!localStorage.getItem('user')) return false;
         }
     }
 );
@@ -45,6 +53,10 @@ export const AccountSlice = createSlice({
         signOut: (state, action) => {
             state.user = null;
             localStorage.removeItem('user');
+        },
+
+        setUser: (state, action) => {
+            state.user = action.payload;
         }
     },
     extraReducers: (builder => {
@@ -53,9 +65,11 @@ export const AccountSlice = createSlice({
         });
 
         builder.addMatcher(isAnyOf(signInUserAsync.rejected, fetchCurrentUserAsync.rejected), (state, action) => {
-            console.error(action.error);
+            state.user = null;
+            localStorage.removeItem('user');
+            toast.error('Session expired ! Please login again !'); 
         });
     })
 });
 
-export const { signOut } = AccountSlice.actions;
+export const { signOut, setUser } = AccountSlice.actions;

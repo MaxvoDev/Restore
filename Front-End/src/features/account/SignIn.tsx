@@ -13,19 +13,6 @@ import { useAppDispatch } from '../../app/store/configureStore';
 import { useNavigate } from 'react-router-dom';
 import { signInUserAsync } from '../basket/AccountSlice';
 
-function Copyright(props: any) {
-    return (
-        <Typography variant="body2" color="text.secondary" align="center" {...props}>
-            {'Copyright © '}
-            <Link color="inherit" href="https://mui.com/">
-                Your Website
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
-
 export default function SignIn() {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
@@ -96,7 +83,6 @@ export default function SignIn() {
                     </Grid>
                 </Box>
             </Box>
-            <Copyright sx={{ mt: 8, mb: 4 }} />
         </Container>
     );
 }
