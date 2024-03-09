@@ -2,6 +2,7 @@ import { ShoppingCart } from "@mui/icons-material";
 import { AppBar, Badge, Box, IconButton, List, ListItem, Switch, Toolbar, Typography } from "@mui/material";
 import { Link, NavLink } from "react-router-dom";
 import { useAppSelector } from "../store/configureStore";
+import UserMenu from "./UserMenu";
 
 interface Props{
     darkMode: boolean,
@@ -23,11 +24,6 @@ const midLinks = [
     { title: 'catalog', path: '/catalog'},
     { title: 'about', path: '/about'},
     { title: 'contact', path: '/contact'},
-]
-
-const rightLinks = [
-    { title: 'Sign In', path: '/signin'},
-    { title: 'Sign Up', path: '/signup'},    
 ]
 
 export default function Header({darkMode, handleThemeChange}: Props) {
@@ -64,17 +60,7 @@ export default function Header({darkMode, handleThemeChange}: Props) {
                         </Badge>
                     </IconButton>
                     
-                    <List sx={{ display: 'flex' }}>
-                        {rightLinks.map(({title, path}) => (
-                            <ListItem key={path}
-                            component={NavLink}
-                            to={path}
-                            sx={navStyles}
-                            >
-                                {title.toUpperCase()}
-                            </ListItem>
-                        ))}
-                    </List>
+                    <UserMenu />
                 </Box>
             </Toolbar>
         </AppBar>

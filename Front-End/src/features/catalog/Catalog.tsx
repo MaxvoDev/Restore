@@ -13,17 +13,12 @@ const sortTypes = [
     {
         value: 'price',
         label: 'Price - Low to High'
-    },
-
-    {
-        value: 'priceDesc',
-        label: 'Price - High to Low'
-    },
+    }
 ]
 export default function Catalog() {
     const products = useAppSelector(productSelectors.selectAll);
     const dispatch = useAppDispatch();
-    const { productParams, productLoaded, filterLoaded, types, brands, status, metaData } = useAppSelector(state => state.catalog);
+    const { productParams, productLoaded, filterLoaded, types, brands, metaData } = useAppSelector(state => state.catalog);
 
     function onChangeParam(name: string, value: string, checked: boolean = true){
         let payload;

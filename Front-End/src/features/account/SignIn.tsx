@@ -1,5 +1,4 @@
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
@@ -8,8 +7,11 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import { useState } from 'react';
-import agent from '../../app/api/agent';
+import { FieldValues, useForm } from 'react-hook-form';
+import { LoadingButton } from '@mui/lab';
+import { useAppDispatch } from '../../app/store/configureStore';
+import { useNavigate } from 'react-router-dom';
+import { signInUserAsync } from '../basket/AccountSlice';
 
 function Copyright(props: any) {
     return (
@@ -25,25 +27,16 @@ function Copyright(props: any) {
 }
 
 export default function SignIn() {
-    const [values, setValues] = useState({
-        username: '',
-        password: ''
+    const dispatch = useAppDispatch();
+    const navigate = useNavigate();
+    const { register, handleSubmit, formState: { isSubmitting, errors, isValid } } = useForm({
+        mode: 'onTouched'
     });
 
-    const handleSubmit = (event: any) => {
-        event.preventDefault();
-        agent.Account.signin(values)
-        .then(resp => {
-            console.log(resp)
-        })
-        .catch(error => {
-            console.log(error);
-        })
-    };
-
-    function onChangeInput(event: any){
-        const { name, value } = event.target;
-        setValues({ ...values, [name]: value });
+    async function submitForm(data: FieldValues){
+        const { username, password } = data;
+        await dispatch(signInUserAsync({ username, password }));
+        navigate('/catalog');
     }
 
     return (
@@ -63,35 +56,37 @@ export default function SignIn() {
                 <Typography component="h1" variant="h5">
                     Sign in
                 </Typography>
-                <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                <Box component="form" onSubmit={handleSubmit(submitForm)} noValidate sx={{ mt: 1 }}>
                     <TextField
                         margin="normal"
                         required
                         fullWidth
-                        label="Username"
-                        name="username"
-                        onChange={(e) => onChangeInput(e)}
                         autoFocus
+                        label="Username"
+                        { ...register("username", { required: 'Username is required' }) }
+                        error={!!errors.username}
+                        helperText={errors?.username?.message as string}
                     />
                     <TextField
                         margin="normal"
                         required
                         fullWidth
-                        name="password"
                         label="Password"
                         type="password"
-                        id="password"
-                        onChange={(e) => onChangeInput(e)}
-                        autoComplete="current-password"
+                        { ...register("password", { required: 'Password is required' }) }
+                        error={!!errors.password}
+                        helperText={errors?.password?.message as string}                    
                     />
-                    <Button
+                    <LoadingButton
+                        disabled={!isValid}
+                        loading={isSubmitting}
                         type="submit"
                         fullWidth
                         variant="contained"
                         sx={{ mt: 3, mb: 2 }}
                     >
                         Sign In
-                    </Button>
+                    </LoadingButton>
                     <Grid container>
                         <Grid item>
                             <Link href="/signup" variant="body2">
