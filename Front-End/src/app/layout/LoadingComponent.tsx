@@ -1,6 +1,9 @@
 import { Backdrop, CircularProgress, Typography } from "@mui/material"
+interface Props{
+    message?: string;
+}
 
-export default function LoadingComponent() {
+export default function LoadingComponent({ message = "Loading..." }: Props) {
     return (
         <>
             <Backdrop
@@ -8,7 +11,7 @@ export default function LoadingComponent() {
                 open={true}
             >
                 <CircularProgress color="inherit" />
-                <Typography marginLeft={3}>Loading...</Typography>
+                <Typography marginLeft={3}>{message}</Typography>
             </Backdrop>
         </>
     )

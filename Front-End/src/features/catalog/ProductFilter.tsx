@@ -30,7 +30,7 @@ export default function ProductFilter() {
             dispatch(fetchProductFiltersAsync());
     }, [filterLoaded, dispatch]);
 
-    if(!filterLoaded) return <LoadingComponent />
+    if(!filterLoaded) return <LoadingComponent message="Loading Product Filters..."/>
 
     return (
         <Paper elevation={3} sx={{ padding: 2 }}>

@@ -94,7 +94,6 @@ export const catalogSlice = createSlice({
         },
 
         setProductParams: (state, action) => {
-            debugger;
             state.productParams = {
                 ...state.productParams,
                 [action.payload.name]: action.payload.value 

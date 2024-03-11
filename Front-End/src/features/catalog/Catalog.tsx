@@ -19,7 +19,7 @@ export default function Catalog() {
             dispatch(fetchProductsAsync());
     }, [productLoaded, fetchProductsAsync]);
 
-    if(!productLoaded && !filterLoaded) return <LoadingComponent />
+    if(!productLoaded && !filterLoaded) return <LoadingComponent message="Loading Products..."/>
 
     return (
         <Grid container>

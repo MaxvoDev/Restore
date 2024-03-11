@@ -1,7 +1,7 @@
 import { List, ListItem } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../store/configureStore";
 import { signOut } from "../../features/basket/AccountSlice";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { setBasket } from "../../features/basket/BasketSlice";
 
 interface Props {
@@ -18,6 +18,7 @@ const userMenu = [
 export default function UserMenu({ navStyles }: Props) {
     const { user } = useAppSelector(state => state.account);
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     function GuessMenu() {
         return (
@@ -58,8 +59,9 @@ export default function UserMenu({ navStyles }: Props) {
     }
 
     async function handleSignout() {
-        dispatch(signOut());
-        dispatch(setBasket(null));
+        await dispatch(signOut());
+        await dispatch(setBasket(null));
+        navigate('/catalog');
     }
 
     return (
