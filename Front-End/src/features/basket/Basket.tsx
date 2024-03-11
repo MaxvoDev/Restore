@@ -1,33 +1,31 @@
-import { useState } from "react"
 import { BasketItem } from "../../app/models/basket";
-import agent from "../../app/api/agent";
 import { Button, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { Add, Delete, Remove } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import BasketSummary from "./BasketSummary";
 import { Link } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../app/store/configureStore";
-import { addBasketItemAsync, removeBasketItemAsync, setBasket } from "./BasketSlice";
+import { addBasketItemAsync, removeBasketItemAsync } from "./BasketSlice";
+import EmptyBasketMessage from "./EmptyBasket";
 
 
 export default function BasketPage() {
     const dispatch = useAppDispatch();
     const { basket, status } = useAppSelector(state => state.basket);
 
-    function handleAdItem(productId: number) {
-        dispatch(addBasketItemAsync({
+    async function handleAdItem(productId: number) {
+        await dispatch(addBasketItemAsync({
             productId: productId,
             quantity: 1
         }));
     }
-    function handleRemoveItem(productId: number, quantity: number) {
-
-        dispatch(removeBasketItemAsync({
+    async function handleRemoveItem(productId: number, quantity: number) {
+        await dispatch(removeBasketItemAsync({
             productId, quantity
         }));
     }
 
-    if (!basket) return <Typography>There is no Product in your Basket</Typography>
+    if (!basket || !basket.items.length) return <EmptyBasketMessage />
 
     return (
         <>

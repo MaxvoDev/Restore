@@ -2,16 +2,10 @@ import { List, ListItem } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../store/configureStore";
 import { signOut } from "../../features/basket/AccountSlice";
 import { NavLink } from "react-router-dom";
+import { setBasket } from "../../features/basket/BasketSlice";
 
-const navStyles = {
-    color: 'inherit',
-    typography: 'h6',
-    '&:hover': {
-        color: 'grey.500'
-    },
-    '&:active': {
-        color: 'text.secondary'
-    }
+interface Props {
+    navStyles: Object;
 }
 
 const userMenu = [
@@ -21,44 +15,56 @@ const userMenu = [
     }
 ]
 
-export default function UserMenu() {
+export default function UserMenu({ navStyles }: Props) {
     const { user } = useAppSelector(state => state.account);
     const dispatch = useAppDispatch();
 
+    function GuessMenu() {
+        return (
+            <List sx={{ display: 'flex' }}>
+                <ListItem
+                    sx={navStyles}
+                    component="a"
+                    href="#">
+                    {user?.email}
+                </ListItem>
+
+                <ListItem
+                    sx={navStyles}
+                    component="a"
+                    href="#"
+                    onClick={() => handleSignout()}>
+                    Sign Out
+                </ListItem>
+            </List>
+
+        )
+    }
+
+    function MemberMenu() {
+        return (
+            <List sx={{ display: 'flex' }}>
+                {userMenu.map(({ title, path }) => (
+                    <ListItem key={path}
+                        component={NavLink}
+                        to={path}
+                        sx={navStyles}
+                    >
+                        {title.toUpperCase()}
+                    </ListItem>
+                ))}
+            </List >
+        )
+    }
+
     async function handleSignout() {
-        await dispatch(signOut({}));
+        dispatch(signOut());
+        dispatch(setBasket(null));
     }
 
     return (
         <>
-            {user ? (
-                <List sx={{ display: 'flex' }}>
-                    <ListItem
-                        sx={navStyles}
-                    >
-                        {user?.email}
-                    </ListItem>
-
-                    <ListItem
-                        sx={navStyles}
-                        onClick={() => handleSignout()}
-                    >
-                        Sign Out
-                    </ListItem>
-                </List>
-            ) : (
-                <List sx={{ display: 'flex' }}>
-                    {userMenu.map(({ title, path }) => (
-                        <ListItem key={path}
-                            component={NavLink}
-                            to={path}
-                            sx={navStyles}
-                        >
-                            {title.toUpperCase()}
-                        </ListItem>
-                    ))}
-                </List>
-            )}
+            { user ? <GuessMenu /> : <MemberMenu /> }
         </>
     )
 }

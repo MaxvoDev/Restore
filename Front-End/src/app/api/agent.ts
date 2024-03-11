@@ -36,7 +36,7 @@ axios.interceptors.response.use(async response => {
                     const modelStateErrors: string[] = [];
                     for(const key in data.errors){
                         if(data.errors[key]){
-                            modelStateErrors.push(data.error[key])
+                            modelStateErrors.push(data.errors[key])
                         }
                     }
 

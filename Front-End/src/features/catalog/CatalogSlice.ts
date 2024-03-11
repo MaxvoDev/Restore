@@ -97,7 +97,6 @@ export const catalogSlice = createSlice({
             state.productParams = {
                 ...state.productParams,
                 ...action.payload,
-                pageNumber: 1
             }
             state.productLoaded = false;
         },
@@ -111,8 +110,18 @@ export const catalogSlice = createSlice({
             state.status = 'pendingFetchProduct';
         });
 
+        builder.addCase(fetchProductDetailAsync.pending, (state, action) => {
+            state.status = 'pendingFetchProduct';
+        });
+
         builder.addCase(fetchProductsAsync.fulfilled, (state, action) => {
             productAdapter.setAll(state, action.payload);
+            state.status = 'idle';
+            state.productLoaded = true;
+        });
+
+        builder.addCase(fetchProductDetailAsync.fulfilled, (state, action) => {
+            productAdapter.upsertOne(state, action.payload);
             state.status = 'idle';
             state.productLoaded = true;
         });

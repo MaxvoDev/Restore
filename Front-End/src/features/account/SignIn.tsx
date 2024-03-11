@@ -10,7 +10,7 @@ import Container from '@mui/material/Container';
 import { FieldValues, useForm } from 'react-hook-form';
 import { LoadingButton } from '@mui/lab';
 import { useAppDispatch } from '../../app/store/configureStore';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { signInUserAsync } from '../basket/AccountSlice';
 
 export default function SignIn() {
@@ -21,9 +21,14 @@ export default function SignIn() {
     });
 
     async function submitForm(data: FieldValues){
-        const { username, password } = data;
-        await dispatch(signInUserAsync({ username, password }));
-        navigate('/catalog');
+        try{    
+            const { username, password } = data;
+            await dispatch(signInUserAsync({ username, password }));
+            navigate('/catalog');
+        }
+        catch(error){
+            debugger;
+        }
     }
 
     return (
@@ -48,7 +53,6 @@ export default function SignIn() {
                         margin="normal"
                         required
                         fullWidth
-                        autoFocus
                         label="Username"
                         { ...register("username", { required: 'Username is required' }) }
                         error={!!errors.username}
@@ -76,7 +80,7 @@ export default function SignIn() {
                     </LoadingButton>
                     <Grid container>
                         <Grid item>
-                            <Link href="/signup" variant="body2">
+                            <Link component={NavLink} to="/signup" variant="body2">
                                 {"Don't have an account? Sign Up"}
                             </Link>
                         </Grid>

@@ -60,7 +60,7 @@ export default function Header({darkMode, handleThemeChange}: Props) {
                         </Badge>
                     </IconButton>
                     
-                    <UserMenu />
+                    <UserMenu navStyles={navStyles}/>
                 </Box>
             </Toolbar>
         </AppBar>

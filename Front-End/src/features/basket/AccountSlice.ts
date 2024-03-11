@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice, isAnyOf } from "@reduxjs/toolkit";
 import { User } from "../../app/models/user";
 import agent from "../../app/api/agent";
 import { toast } from "react-toastify";
+import { setBasket } from "./BasketSlice";
 
 export interface AccountState{
     user: User | null;
@@ -17,10 +18,24 @@ export const signInUserAsync = createAsyncThunk<User, { username: string, passwo
         try{
             const user = await agent.Account.signin(loginDto);
             localStorage.setItem('user', JSON.stringify(user));
+            if(user.basket) thunkAPI.dispatch(setBasket(user.basket));
             return user;
         }
         catch(error: any){
-            thunkAPI.rejectWithValue({ error: error.data });
+            return thunkAPI.rejectWithValue({ error: error });
+        }
+    }
+);
+
+export const signUpUserAsync = createAsyncThunk<User, { username: string, password: string, email: string }>(
+    'account/signUpUserAsync',
+    async (signUpDto, thunkAPI) => {
+        try{
+            const user = await agent.Account.signup(signUpDto);
+            return user;
+        }
+        catch(error: any){
+            return thunkAPI.rejectWithValue({ error: error });
         }
     }
 );
@@ -33,10 +48,11 @@ export const fetchCurrentUserAsync = createAsyncThunk<User>(
         try{
             const user = await agent.Account.currentUser();
             localStorage.setItem('user', JSON.stringify(user));
+            if(user.basket) thunkAPI.dispatch(setBasket(user.basket));
             return user;
         }
         catch(error: any){
-            thunkAPI.rejectWithValue({ error: error.data });
+            return thunkAPI.rejectWithValue({ error: error });
         }
     },
     {
@@ -50,7 +66,7 @@ export const AccountSlice = createSlice({
     name: 'account',
     initialState,
     reducers: {
-        signOut: (state, action) => {
+        signOut: (state) => {
             state.user = null;
             localStorage.removeItem('user');
         },

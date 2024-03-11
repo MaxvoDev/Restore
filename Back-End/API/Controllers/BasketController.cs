@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Data;
 using API.DTOs;
 using API.Entities;
+using API.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,35 +22,16 @@ namespace API.Controllers
         [HttpGet(Name = "GetBasket")]
         public async Task<ActionResult<BasketDto>> GetBasket()
         {
-            var basket = await RetrieveBasket();
+            var basket = await RetrieveBasket(GetBasketID());
 
             if (basket == null) return NotFound();
-            return MapToBasketDto(basket);
-        }
-
-        private BasketDto MapToBasketDto(Basket basket)
-        {
-            return new BasketDto
-            {
-                Id = basket.Id,
-                BuyerId = basket.BuyerId,
-                Items = basket.Items.Select((item) => new BasketItemDto
-                {
-                    ProductId = item.ProductId,
-                    Name = item.Product.Name,
-                    Price = item.Product.Price,
-                    PictureUrl = item.Product.PictureUrl,
-                    Type = item.Product.Type,
-                    Brand = item.Product.Brand,
-                    Quantity = item.Quantity
-                }).ToList()
-            };
+            return basket.MapToBasketDto();
         }
 
         [HttpPost]
         public async Task<ActionResult<BasketDto>> AddItemToBasket(int productId, int quantity)
         {
-            var basket = await RetrieveBasket();
+            var basket = await RetrieveBasket(GetBasketID());
             if (basket == null)
             {
                 basket = CreateBasket();
@@ -61,7 +43,7 @@ namespace API.Controllers
 
             var result = await _storeContext.SaveChangesAsync() > 0;
 
-            if (result) return CreatedAtRoute("GetBasket", MapToBasketDto(basket));
+            if (result) return CreatedAtRoute("GetBasket", basket.MapToBasketDto());
 
             return BadRequest(new ProblemDetails { Title = "Problem Saving Item To Basket " });
 
@@ -70,7 +52,7 @@ namespace API.Controllers
         [HttpDelete]
         public async Task<ActionResult> RemoveBasketItem(int productId, int quantity)
         {
-            var basket = await RetrieveBasket();
+            var basket = await RetrieveBasket(GetBasketID());
             if (basket == null) return NotFound();
 
             basket.RemoveItem(productId, quantity);
@@ -82,28 +64,31 @@ namespace API.Controllers
 
         private Basket CreateBasket()
         {
-            var buyerId = Guid.NewGuid().ToString();
-            var cookieOption = new CookieOptions
-            {
-                IsEssential = true,
-                Expires = DateTime.Now.AddDays(3),
-            };
-            Response.Cookies.Append("buyerId", buyerId, cookieOption);
+            var buyerId = User.Identity?.Name;
+            if(string.IsNullOrEmpty(buyerId)){
+                buyerId = Guid.NewGuid().ToString();
+                var cookieOption = new CookieOptions
+                {
+                    IsEssential = true,
+                    Expires = DateTime.Now.AddDays(3),
+                };
+                Response.Cookies.Append("buyerId", buyerId, cookieOption);
+            }
 
-            var basket = new Basket
-            {
-                BuyerId = buyerId
-            };
+            var basket = new Basket {  BuyerId = buyerId };
             _storeContext.Baskets.Add(basket);
             return basket;
         }
 
-        private async Task<Basket> RetrieveBasket()
+        private string  GetBasketID(){
+            return User.Identity?.Name ?? Request.Cookies["buyerId"];
+        }
+        private async Task<Basket> RetrieveBasket(string buyerId)
         {
             return await this._storeContext.Baskets
             .Include(i => i.Items)
             .ThenInclude(p => p.Product)
-            .FirstOrDefaultAsync(x => x.BuyerId == Request.Cookies["buyerId"]);
+            .FirstOrDefaultAsync(x => x.BuyerId == buyerId);
         }
     }
 }
