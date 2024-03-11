@@ -1,7 +1,6 @@
 import { createAsyncThunk, createSlice, isAnyOf } from "@reduxjs/toolkit";
 import { User } from "../../app/models/user";
 import agent from "../../app/api/agent";
-import { toast } from "react-toastify";
 import { setBasket } from "./BasketSlice";
 
 export interface AccountState{
@@ -9,7 +8,7 @@ export interface AccountState{
 }
 
 const initialState: AccountState = {
-    user: null
+    user: null,
 };
 
 export const signInUserAsync = createAsyncThunk<User, { username: string, password: string }>(
@@ -80,10 +79,14 @@ export const AccountSlice = createSlice({
             state.user = action.payload;
         });
 
-        builder.addMatcher(isAnyOf(signInUserAsync.rejected, fetchCurrentUserAsync.rejected), (state, action) => {
+        builder.addMatcher(isAnyOf(signInUserAsync.rejected, fetchCurrentUserAsync.rejected), (state, action: any) => {
             state.user = null;
             localStorage.removeItem('user');
-            toast.error('Session expired ! Please login again !'); 
+            throw action.payload.error;
+        });
+        
+        builder.addMatcher(isAnyOf(signUpUserAsync.rejected), (state, action: any) => {
+            throw action.payload.error;
         });
     })
 });

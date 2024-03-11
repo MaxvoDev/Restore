@@ -9,9 +9,11 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { FieldValues, useForm } from 'react-hook-form';
 import { LoadingButton } from '@mui/lab';
-import { useAppDispatch } from '../../app/store/configureStore';
+import { useAppDispatch, useAppSelector } from '../../app/store/configureStore';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { signInUserAsync } from '../basket/AccountSlice';
+import { useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 export default function SignIn() {
     const dispatch = useAppDispatch();
@@ -21,13 +23,13 @@ export default function SignIn() {
     });
 
     async function submitForm(data: FieldValues){
-        try{    
+        try{
             const { username, password } = data;
             await dispatch(signInUserAsync({ username, password }));
             navigate('/catalog');
         }
-        catch(error){
-            debugger;
+        catch(error: any){
+            toast.error(error.statusText);
         }
     }
 

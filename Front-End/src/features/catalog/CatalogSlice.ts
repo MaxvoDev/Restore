@@ -94,10 +94,14 @@ export const catalogSlice = createSlice({
         },
 
         setProductParams: (state, action) => {
+            debugger;
             state.productParams = {
                 ...state.productParams,
-                ...action.payload,
+                [action.payload.name]: action.payload.value 
             }
+            if(action.payload.name != 'pageNumber')
+                state.productParams.pageNumber = 1;
+
             state.productLoaded = false;
         },
         

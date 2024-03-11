@@ -24,24 +24,19 @@ export default function SignUp() {
     async function submitForm(data: FieldValues){
         try{ 
             const { username, password, email } = data;
-            const response = await dispatch(signUpUserAsync({ username, password, email }));
-            if (response.payload && response.payload.error && Array.isArray(response.payload.error)) {
-                for(const error of response.payload.error){
-                    if(error.toUpperCase().includes("USERNAME"))
-                        setError('username', { message: error });
-                    else if(error.toUpperCase().includes("PASSWORD"))
-                        setError('password', { message: error });
-                    else if(error.toUpperCase().includes("EMAIL"))
-                        setError('email', { message: error });
-                }
-            }
-            else{
-                toast.success('Registration successful - You can now login');
-                navigate('/signin');
-            }
+            await dispatch(signUpUserAsync({ username, password, email }));
+            toast.success('Registration successful - You can now login');
+            navigate('/signin');
         }
-        catch(error){
-            console.log(error);
+        catch(errors: any){
+            for(const error of errors){
+                if(error.toUpperCase().includes("USERNAME"))
+                    setError('username', { message: error });
+                else if(error.toUpperCase().includes("PASSWORD"))
+                    setError('password', { message: error });
+                else if(error.toUpperCase().includes("EMAIL"))
+                    setError('email', { message: error });
+            }
         }
     }
 
